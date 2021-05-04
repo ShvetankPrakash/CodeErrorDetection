@@ -8,4 +8,7 @@ def chopFile(filename):
 
 if __name__ == "__main__":
    # filename to be chopped passed as command line arg
-   chopFile(sys.argv[1])
+   if len(sys.argv) != 2:
+      print("Usage: ./generateData.py <filename>")
+   else:  
+      chopFile(sys.argv[1])

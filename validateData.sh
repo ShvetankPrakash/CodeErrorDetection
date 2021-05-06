@@ -7,5 +7,5 @@ codeDir="./pythonCode"
 
 for dir in "$codeDir"/*
 do
-   echo "$dir"
+   find $dir -name "*.py" -exec python testChopping.py {} \;
 done

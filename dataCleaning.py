@@ -4,14 +4,15 @@ import sys
 def is_ascii(filename):
    f = open(filename, "r")
    s = f.read() 
-   return all(ord(c) < 128 for c in s)
+   assert all(ord(c) < 128 for c in s)
 
 
 def is_bad_file(filename):
-   ascii_only = is_ascii(filename)
+   is_ascii(filename)
 
-   if not ascii_only:
-      print("BAD FILE.")
+   # TODO: 
+   #  Add other checks for cleaning as needed below
+
 
 if __name__ == "__main__":
    # filename to be checked as command line arg

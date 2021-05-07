@@ -1,3 +1,0 @@
-collections:
-  # should not work: git prefix or type is required
-  - name: file://{{ galaxy_dir }}/development/amazon.aws/.git

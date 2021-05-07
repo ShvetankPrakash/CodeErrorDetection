@@ -1,3 +1,0 @@
-pyenchant
-sphinx
-sphinxcontrib-spelling

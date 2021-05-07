@@ -1,7 +1,0 @@
-{
-    "prefixes": [
-        "requirements.txt",
-        "test/lib/ansible_test/_data/requirements/sanity.import-plugins.txt"
-    ],
-    "output": "path-line-column-message"
-}

@@ -39,14 +39,14 @@ def chopFile(filename):
       
 
    # Write chopped blocks to .npy file
-   # TODO
-   # print(codeBlocks)
+   writeName = filename.split(".")[0]
+   for i, block in enumerate(codeBlocks):
+      np.save("./dataset/" + writeName + "_" + str(i) + ".npy", block)  
 
    f.close()
    return codeBlocks
 
        
-
 if __name__ == "__main__":
    # filename to be chopped passed as command line arg
    if len(sys.argv) != 2:

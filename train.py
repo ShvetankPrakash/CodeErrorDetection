@@ -20,16 +20,16 @@ def getDataset():
    dataset, labels = readDataset(DATASET_DIR)
 
    # Split Dataset (70/30 split)
-   trainExamples =
-   trainLabels =
+   seventy       = np.floor(dataset.shape[0] * 0.7)
+   trainExamples = dataset[:seventy]
+   trainLabels   = labels[:seventy]   
 
-   testExamples =
-   testLabels =
+   testExamples = dataset[seventy:]
+   testLabels   = labels[seventy:]
 
    # Create TF Dataset objects
    trainDataset = tf.data.Dataset.from_tensor_slices((trainExamples, trainLabels))
-   testDataset = tf.data.Dataset.from_tensor_slices((testExamples, testLabels))
-
+   testDataset  = tf.data.Dataset.from_tensor_slices((testExamples, testLabels))
 
    return trainDataset, testDataset
 

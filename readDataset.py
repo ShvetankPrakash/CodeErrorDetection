@@ -18,10 +18,11 @@ def readDataset(directory):
 
       # Add error to code block and add to dataset
       errorBlock = codeBlock 
+      errorBlock[0,0] = ord('!')  # dummy error for now (TODO: FIX)
       dataset = np.insert(dataset, dataset.shape[0], errorBlock, 0)
       labels = np.append(labels, 0)
   
-   print (dataset.shape)
+   print(dataset.shape)
    print(labels.shape) 
    return dataset, labels
       

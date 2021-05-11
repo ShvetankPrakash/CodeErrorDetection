@@ -39,7 +39,7 @@ def chopFile(filename):
       
 
    # Write chopped blocks to .npy file
-   writeName = filename.split(".")[0]
+   writeName = filename.split("/")[-1].split(".")[0]
    for i, block in enumerate(codeBlocks):
       np.save("./dataset/" + writeName + "_" + str(i) + ".npy", block)  
 

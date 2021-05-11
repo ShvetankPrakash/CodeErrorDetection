@@ -29,5 +29,4 @@ export -f validateFileBlocks
 for dir in "$codeDir"/*
 do
    find $dir -name "*.py" -exec bash -c 'validateFileBlocks "$@"' bash {} +;
-   #find $dir -name "*.py" -exec python testChopping.py {} \;
 done

@@ -4,6 +4,9 @@ import numpy as np
 import glob, os, sys
 
 def readDataset(directory):
+   # Seed random num generator for reproducability
+   np.random.seed(0)
+
    # Create dataset with labels for training
    dataset = np.zeros((0, 80, 80), dtype=np.uint8)
    labels  = np.zeros((0), dtype = np.uint8)
@@ -17,8 +20,14 @@ def readDataset(directory):
       labels = np.append(labels, 1)
 
       # Add error to code block and add to dataset
-      errorBlock = codeBlock 
-      errorBlock[0,0] = ord('!')  # dummy error for now (TODO: FIX)
+      errorBlock = codeBlock
+      indexOne = np.random.randint(79) 
+      indexTwo = np.random.randint(79)
+      randChar = np.random.randint(255) 
+      # Make sure random char is not same as orig char to enforce error
+      while randChar == errorBlock[indexOne, indexTwo]: 
+         randChar = np.random.randint(255) 
+      errorBlock[indexOne, indexTwo] = randChar # set dummy error 
       dataset = np.insert(dataset, dataset.shape[0], errorBlock, 0)
       labels = np.append(labels, 0)
   

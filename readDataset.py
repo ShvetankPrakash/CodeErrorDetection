@@ -8,12 +8,13 @@ def readDataset(directory):
    np.random.seed(0)
 
    # Create dataset with labels for training
-   dataset = np.zeros((0, 80, 80), dtype=np.uint8)
+   dataset = np.zeros((0, 80, 80, 1), dtype=np.uint8)
    labels  = np.zeros((0), dtype = np.uint8)
 
    os.chdir(directory)
    for filename in glob.glob("*.npy"):
       codeBlock = np.load(filename, allow_pickle=True) 
+      codeBlock = np.expand_dims(codeBlock, axis=2)  # add channel-last ordering
       
       # Add error-free code block to dataset
       dataset = np.insert(dataset, dataset.shape[0], codeBlock, 0)

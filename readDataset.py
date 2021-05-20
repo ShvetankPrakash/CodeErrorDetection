@@ -21,7 +21,7 @@ def readDataset(directory):
       labels = np.append(labels, 1)
 
       # Add error to code block and add to dataset
-      errorBlock = codeBlock
+      errorBlock = np.copy(codeBlock)
       indexOne = np.random.randint(79) 
       indexTwo = np.random.randint(79)
       randChar = np.random.randint(255) 

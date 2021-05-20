@@ -6,6 +6,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 from readDataset import readDataset
+from tensorflow.keras import layers, models
 #import setGPU
 
 
@@ -13,7 +14,7 @@ from readDataset import readDataset
 DATASET_DIR = "./dataset"
 BATCH_SIZE = 64
 SHUFFLE_BUFFER_SIZE = 100
-EPOCHS = 100
+EPOCHS = 15
 
 def getDataset():
    # Read Dataset
@@ -43,12 +44,18 @@ def train():
    testDataset = testDataset.batch(BATCH_SIZE)
 
    # Build and train model
-   model = tf.keras.Sequential([
-       tf.keras.layers.Flatten(input_shape=(80, 80)),
-       tf.keras.layers.Dense(128, activation='relu'),
-       tf.keras.layers.Dense(2)
-   ])
-   
+   model = models.Sequential()
+   model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(80, 80, 1)))
+   model.add(layers.MaxPooling2D((2, 2)))
+   model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(layers.MaxPooling2D((2, 2)))
+   model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(layers.MaxPooling2D((2, 2)))
+   model.add(layers.Flatten())
+   model.add(layers.Dense(64, activation='relu'))
+   model.add(layers.Dense(2))
+   model.summary()
+ 
    model.compile(optimizer=tf.keras.optimizers.RMSprop(),
                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                  metrics=['sparse_categorical_accuracy'])

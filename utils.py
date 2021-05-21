@@ -12,3 +12,12 @@ def printCode(codeBlock):
       print(chr(letter), end="")
 
 
+def diffCodeBlock(b1, b2):
+   diff = b1 - b2
+   for i, row in enumerate(diff):
+      if (row == 0).all():
+         continue
+      print(i)
+      print(row)
+
+

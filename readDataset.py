@@ -24,11 +24,11 @@ def readDataset(directory):
       errorBlock = np.copy(codeBlock)
       indexOne = np.random.randint(79) 
       indexTwo = np.random.randint(79)
-      randChar = np.random.randint(255) 
+      randChar = np.random.randint(32, 127) 
 
       # Make sure random char is not same as orig char to enforce error
       while randChar == errorBlock[indexOne, indexTwo]: 
-         randChar = np.random.randint(255) 
+         randChar = np.random.randint(32, 127) 
       errorBlock[indexOne, indexTwo] = randChar # set dummy error 
       dataset = np.insert(dataset, dataset.shape[0], errorBlock, 0)
       labels = np.append(labels, 0)

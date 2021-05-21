@@ -35,15 +35,8 @@ def getDataset():
    return trainDataset, testDataset
 
 
-def train():
-   # Obtain TF datasets
-   trainDataset, testDataset = getDataset() 
-
-   # Shuffle and batch the datasets
-   trainDataset = trainDataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
-   testDataset = testDataset.batch(BATCH_SIZE)
-
-   # Build and train model
+def get_model():
+   # Build model
    model = models.Sequential()
    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(80, 80, 1)))
    model.add(layers.MaxPooling2D((2, 2)))
@@ -55,12 +48,38 @@ def train():
    model.add(layers.Dense(64, activation='relu'))
    model.add(layers.Dense(2))
    model.summary()
+
+   return model 
+
+
+def train():
+   # Obtain TF datasets
+   trainDataset, testDataset = getDataset() 
+
+   # Shuffle and batch the datasets
+   trainDataset = trainDataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
+   testDataset = testDataset.batch(BATCH_SIZE)
+
+   # Obtain and train model
+   model = get_model() 
  
+   checkpoint_filepath = '../best_model_sparse.h5'
+   model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+      filepath=checkpoint_filepath,
+      save_weights_only=True,
+      monitor='val_sparse_categorical_accuracy',
+      mode='max',
+      save_best_only=True) 
+
    model.compile(optimizer=tf.keras.optimizers.RMSprop(),
                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                  metrics=['sparse_categorical_accuracy'])
    
-   model.fit(trainDataset, epochs=EPOCHS)
+   model.fit(
+      trainDataset, 
+      epochs=EPOCHS,
+      validation_data=testDataset,
+      callbacks=[model_checkpoint_callback])
 
    # Evaluate model 
    print("-------------------EVALUATE ON TEST SET--------------------")

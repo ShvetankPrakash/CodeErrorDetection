@@ -25,6 +25,7 @@ def readDataset(directory):
       indexOne = np.random.randint(79) 
       indexTwo = np.random.randint(79)
       randChar = np.random.randint(255) 
+
       # Make sure random char is not same as orig char to enforce error
       while randChar == errorBlock[indexOne, indexTwo]: 
          randChar = np.random.randint(255) 

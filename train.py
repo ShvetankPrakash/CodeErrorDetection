@@ -19,6 +19,9 @@ EPOCHS = 15
 def getDataset():
    # Read Dataset
    dataset, labels = readDataset(DATASET_DIR)
+   
+   # Normalize data
+   dataset = dataset / 256.0 
 
    # Split Dataset (70/30 split)
    seventy       = int(np.floor(dataset.shape[0] * 0.7))
@@ -38,11 +41,17 @@ def getDataset():
 def get_model():
    # Build model
    model = models.Sequential()
-   model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(80, 80, 1)))
+   model.add(layers.Conv2D(32, (3, 3), input_shape=(80, 80, 1)))
+   model.add(layers.BatchNormalization())
+   model.add(layers.Activation('relu'))
    model.add(layers.MaxPooling2D((2, 2)))
-   model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(layers.Conv2D(64, (3, 3)))
+   model.add(layers.BatchNormalization())
+   model.add(layers.Activation('relu'))
    model.add(layers.MaxPooling2D((2, 2)))
-   model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(layers.Conv2D(64, (3, 3)))
+   model.add(layers.BatchNormalization())
+   model.add(layers.Activation('relu'))
    model.add(layers.MaxPooling2D((2, 2)))
    model.add(layers.Flatten())
    model.add(layers.Dense(64, activation='relu'))

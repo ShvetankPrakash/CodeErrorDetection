@@ -24,6 +24,10 @@ def readDataset(directory):
       errorBlock = np.copy(codeBlock)
       indexOne = np.random.randint(79) 
       indexTwo = np.random.randint(79)
+      # Replace an existing char in the code not add to a blank cell
+      while errorBlock[indexOne, indexTwo] == 0:
+         indexOne = np.random.randint(79) 
+         indexTwo = np.random.randint(79)
       randChar = np.random.randint(32, 127) 
 
       # Make sure random char is not same as orig char to enforce error

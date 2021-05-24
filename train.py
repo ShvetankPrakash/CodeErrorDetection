@@ -38,7 +38,7 @@ def getDataset():
    return trainDataset, testDataset
 
 
-def get_model():
+def get_multi_class_model():
    # Build model
    model = models.Sequential()
    model.add(layers.Conv2D(32, (3, 3), input_shape=(80, 80, 1)))
@@ -61,6 +61,23 @@ def get_model():
    return model 
 
 
+def get_binary_model():
+   # Build model
+   model = models.Sequential()
+   model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(80, 80, 1)))
+   model.add(layers.MaxPooling2D((2, 2)))
+   model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(layers.MaxPooling2D((2, 2)))
+   model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(layers.MaxPooling2D((2, 2)))
+   model.add(layers.Flatten())
+   model.add(layers.Dense(64, activation='relu'))
+   model.add(layers.Dense(1, activation='sigmoid'))
+   model.summary()
+
+   return model
+
+
 def train():
    # Obtain TF datasets
    trainDataset, testDataset = getDataset() 
@@ -70,7 +87,7 @@ def train():
    testDataset = testDataset.batch(BATCH_SIZE)
 
    # Obtain and train model
-   model = get_model() 
+   model = get_multi_class_model() 
  
    checkpoint_filepath = '../best_model_sparse.h5'
    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(

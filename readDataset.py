@@ -3,19 +3,24 @@
 import numpy as np
 import glob, os, sys
 
-def readDataset(directory):
+def readDataset(directory, rgb=False):
    # Seed random num generator for reproducability
    np.random.seed(0)
 
    # Create dataset with labels for training
-   dataset = np.zeros((0, 80, 80, 1), dtype=np.uint8)
+   if rgb:
+      dataset = np.zeros((0, 80, 80, 3), dtype=np.uint8)
+   else:
+      dataset = np.zeros((0, 80, 80, 1), dtype=np.uint8)
    labels  = np.zeros((0), dtype = np.uint8)
 
    os.chdir(directory)
    for filename in glob.glob("*.npy"):
       codeBlock = np.load(filename, allow_pickle=True) 
       codeBlock = np.expand_dims(codeBlock, axis=2)  # add channel-last ordering
-      
+      if rgb:
+         codeBlock = np.repeat(codeBlock, 3, axis=2)
+
       # Add error-free code block to dataset
       dataset = np.insert(dataset, dataset.shape[0], codeBlock, 0)
       labels = np.append(labels, 1)
@@ -25,13 +30,13 @@ def readDataset(directory):
       indexOne = np.random.randint(79) 
       indexTwo = np.random.randint(79)
       # Replace an existing char in the code not add to a blank cell
-      while errorBlock[indexOne, indexTwo] == 0:
+      while (errorBlock[indexOne, indexTwo] == 0).all():
          indexOne = np.random.randint(79) 
          indexTwo = np.random.randint(79)
       randChar = np.random.randint(32, 127) 
 
       # Make sure random char is not same as orig char to enforce error
-      while randChar == errorBlock[indexOne, indexTwo]: 
+      while (randChar == errorBlock[indexOne, indexTwo]).all(): 
          randChar = np.random.randint(32, 127) 
       errorBlock[indexOne, indexTwo] = randChar # set dummy error 
       dataset = np.insert(dataset, dataset.shape[0], errorBlock, 0)

@@ -11,14 +11,14 @@ from tensorflow.keras import layers, models
 
 
 # Constants for training
-DATASET_DIR = "./dataset"
+DATASET_DIR = "./dataset_orig"
 BATCH_SIZE = 64
 SHUFFLE_BUFFER_SIZE = 100
 EPOCHS = 15
 
-def getDataset():
+def getDataset(rgb=False):
    # Read Dataset
-   dataset, labels = readDataset(DATASET_DIR)
+   dataset, labels = readDataset(DATASET_DIR, rgb)
    
    # Normalize data
    dataset = dataset / 256.0 
@@ -39,7 +39,7 @@ def getDataset():
 
 
 def get_multi_class_model():
-   # Build model
+   # Build model with two neuron output
    model = models.Sequential()
    model.add(layers.Conv2D(32, (3, 3), input_shape=(80, 80, 1)))
    model.add(layers.BatchNormalization())
@@ -62,7 +62,7 @@ def get_multi_class_model():
 
 
 def get_binary_model():
-   # Build model
+   # Build model with single neuron output
    model = models.Sequential()
    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(80, 80, 1)))
    model.add(layers.MaxPooling2D((2, 2)))
@@ -78,18 +78,42 @@ def get_binary_model():
    return model
 
 
+def get_resnet():
+   # Obtain pretrained ResNet and other layers needed to tweak model for our purposes
+   resnet = tf.keras.applications.resnet.ResNet50(include_top=False, input_shape=(80,80,3))
+   resnet.trainable = False
+   preprocess_input = tf.keras.applications.resnet.preprocess_input
+   global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
+   prediction_layer = tf.keras.layers.Dense(1)
+
+   # Chain pieces together
+   inputs = tf.keras.Input(shape=(80,80, 3))
+   x = preprocess_input(inputs)
+   x = resnet(x, training=False)
+   x = global_average_layer(x)
+   x = tf.keras.layers.Dropout(0.2)(x)
+   outputs = prediction_layer(x)
+   model = tf.keras.Model(inputs, outputs)
+   
+   return model
+
+   
+
 def train():
    # Obtain TF datasets
-   trainDataset, testDataset = getDataset() 
+   rgb = True
+   trainDataset, testDataset = getDataset(rgb) 
 
    # Shuffle and batch the datasets
    trainDataset = trainDataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
    testDataset = testDataset.batch(BATCH_SIZE)
 
    # Obtain and train model
-   model = get_multi_class_model() 
+   #model = get_multi_class_model() 
+   #model = get_binary_model() 
+   model = get_resnet() 
  
-   checkpoint_filepath = '../best_model_sparse.h5'
+   checkpoint_filepath = '../best_model_resnet.h5'
    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=checkpoint_filepath,
       save_weights_only=True,
@@ -97,10 +121,22 @@ def train():
       mode='max',
       save_best_only=True) 
 
-   model.compile(optimizer=tf.keras.optimizers.RMSprop(),
-                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                 metrics=['sparse_categorical_accuracy'])
-   
+   # Multi-Model Compilation
+   #model.compile(optimizer=tf.keras.optimizers.RMSprop(),
+   #              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+   #              metrics=['sparse_categorical_accuracy'])
+
+   # Binary Model Compilation
+   #model.compile(optimizer=tf.keras.optimizers.RMSprop(),
+   #              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+   #              metrics=['accuracy'])
+
+   # Resnet Compilation
+   base_learning_rate = 0.0001
+   model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+                 loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+                 metrics=['accuracy'])
+
    model.fit(
       trainDataset, 
       epochs=EPOCHS,

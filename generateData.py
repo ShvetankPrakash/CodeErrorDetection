@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-
+from utils import *
 
 # Dim of square code blocks
 SIZE = 80
@@ -37,11 +37,13 @@ def chopFile(filename):
    if not (matrix == 0).all():
       codeBlocks.append(matrix) 
       
-
+   for block in codeBlocks:
+      printCode(block) 
+      print("-------------------------------------------------------------------------")
    # Write chopped blocks to .npy file
-   writeName = filename.split("/")[-1].split(".")[0]
-   for i, block in enumerate(codeBlocks):
-      np.save("./dataset/" + writeName + "_" + str(i) + ".npy", block)  
+   #writeName = filename.split("/")[-1].split(".")[0]
+   #for i, block in enumerate(codeBlocks):
+   #   np.save("./dataset/" + writeName + "_" + str(i) + ".npy", block)  
 
    f.close()
    return codeBlocks

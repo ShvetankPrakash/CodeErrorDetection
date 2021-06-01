@@ -6,7 +6,8 @@ import sys
 import numpy as np
 import tensorflow as tf
 from readDataset import readDataset
-from tensorflow.keras import layers, models
+from tensorflow.keras import layers, models, losses
+from autoencoder import Autoencoder
 #import setGPU
 
 
@@ -16,15 +17,52 @@ BATCH_SIZE = 64
 SHUFFLE_BUFFER_SIZE = 100
 EPOCHS = 15
 
-def getDataset(rgb=False):
+def getNormals(dataset, rgb=False):
+   if rgb:
+      normals = np.zeros((0, 80, 80, 3), dtype=np.uint8)
+   else:
+      normals = np.zeros((0, 80, 80, 1), dtype=np.uint8)
+
+   for idx, codeBlock in enumerate(dataset):
+      if idx % 2 == 0:
+         errorBlock = np.copy(codeBlock)
+         normals = np.insert(normals, normals.shape[0], errorBlock, 0)
+
+   return normals
+
+
+def getAnomalies(dataset, rgb=False):
+   if rgb:
+      anomalies = np.zeros((0, 80, 80, 3), dtype=np.uint8)
+   else:
+      anomalies = np.zeros((0, 80, 80, 1), dtype=np.uint8)
+
+   for idx, codeBlock in enumerate(dataset):
+      if idx % 2 == 1:
+         errorBlock = np.copy(codeBlock)
+         anomalies = np.insert(anomalies, anomalies.shape[0], errorBlock, 0)
+
+   return anomalies
+
+
+def getDataset(rgb=False, autoencoder=False, normalize=False):
    # Read Dataset
    dataset, labels = readDataset(DATASET_DIR, rgb)
    
    # Normalize data
-   dataset = dataset / 256.0 
+   if normalize:
+      dataset = dataset / 255.0 
 
    # Split Dataset (70/30 split)
-   seventy       = int(np.floor(dataset.shape[0] * 0.7))
+   seventy = int(np.floor(dataset.shape[0] * 0.7))
+
+   if autoencoder:
+      normalDataset   = getNormals(dataset[: seventy])
+      #anomalyData    = getAnomalies()
+      testDataset     = dataset[seventy :]
+      
+      return normalDataset, testDataset
+
    trainExamples = dataset[: seventy]
    trainLabels   = labels[: seventy]   
 
@@ -38,7 +76,7 @@ def getDataset(rgb=False):
    return trainDataset, testDataset
 
 
-def get_multi_class_model():
+def getMultiClassCnn():
    # Build model with two neuron output
    model = models.Sequential()
    model.add(layers.Conv2D(32, (3, 3), input_shape=(80, 80, 1)))
@@ -61,7 +99,7 @@ def get_multi_class_model():
    return model 
 
 
-def get_binary_model():
+def getBinaryCnn():
    # Build model with single neuron output
    model = models.Sequential()
    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(80, 80, 1)))
@@ -78,7 +116,7 @@ def get_binary_model():
    return model
 
 
-def get_resnet():
+def getResnet():
    # Obtain pretrained ResNet and other layers needed to tweak model for our purposes
    resnet = tf.keras.applications.resnet.ResNet50(include_top=False, input_shape=(80,80,3))
    resnet.trainable = False
@@ -97,55 +135,74 @@ def get_resnet():
    
    return model
 
-   
+
+def getAutoencoder():
+   model = Autoencoder()
+   return model 
+
 
 def train():
    # Obtain TF datasets
-   rgb = True
-   trainDataset, testDataset = getDataset(rgb) 
+   rgb = False
+   autoencoder = True
+   normalize = True
+   trainDataset, testDataset = getDataset(rgb, autoencoder, normalize) 
 
    # Shuffle and batch the datasets
-   trainDataset = trainDataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
-   testDataset = testDataset.batch(BATCH_SIZE)
+   if not autoencoder:
+      trainDataset = trainDataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
+      testDataset = testDataset.batch(BATCH_SIZE)
 
    # Obtain and train model
-   #model = get_multi_class_model() 
-   #model = get_binary_model() 
-   model = get_resnet() 
+   #model = getMultiClassCnn() 
+   #model = getBinaryCnn() 
+   #model = getResnet() 
+   model = getAutoencoder()
  
-   checkpoint_filepath = '../best_model_resnet.h5'
+   checkpoint_filepath = '../best_model_autoencoder.h5'
    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=checkpoint_filepath,
       save_weights_only=True,
-      monitor='val_sparse_categorical_accuracy',
-      mode='max',
+      monitor='val_loss',
+      mode='min',
       save_best_only=True) 
 
-   # Multi-Model Compilation
+   # Multi-Model CNN Compilation
    #model.compile(optimizer=tf.keras.optimizers.RMSprop(),
    #              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
    #              metrics=['sparse_categorical_accuracy'])
 
-   # Binary Model Compilation
+   # Binary Model CNN Compilation
    #model.compile(optimizer=tf.keras.optimizers.RMSprop(),
    #              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
    #              metrics=['accuracy'])
 
-   # Resnet Compilation
-   base_learning_rate = 0.0001
-   model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-                 loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-                 metrics=['accuracy'])
+   # ResNet Compilation
+   #base_learning_rate = 0.0001
+   #model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+   #              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+   #              metrics=['accuracy'])
+   #model.fit(
+   #   trainDataset, 
+   #   epochs=EPOCHS,
+   #   validation_data=testDataset,
+   #   callbacks=[model_checkpoint_callback])
 
-   model.fit(
-      trainDataset, 
-      epochs=EPOCHS,
-      validation_data=testDataset,
-      callbacks=[model_checkpoint_callback])
+   # Autoencoder Compilation
+   model.compile(optimizer='adam', loss=losses.MeanSquaredError())
+   model.fit(trainDataset, trainDataset,
+                epochs=EPOCHS,
+                shuffle=True,
+                validation_data=(testDataset, testDataset),
+                callbacks=[model_checkpoint_callback])
+
 
    # Evaluate model 
-   print("-------------------EVALUATE ON TEST SET--------------------")
-   model.evaluate(testDataset)
+   if not autoencoder:
+      print("-------------------EVALUATE ON TEST SET--------------------")
+      model.evaluate(testDataset)
+   
+   return model, testDataset
 
 
 if __name__ == "__main__":

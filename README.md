@@ -36,3 +36,13 @@ conda activate codeErrorDetection
 ```
 python generateData <filename.py>
 ```
+#### Create Dataset and Validate 
+
+```
+./validateAndCreateDataset.sh
+```
+#### Train Neural Network (various models in file to be selected from)
+
+```
+python train.py
+```

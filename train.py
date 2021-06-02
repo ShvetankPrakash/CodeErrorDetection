@@ -19,9 +19,9 @@ EPOCHS = 15
 
 def getNormals(dataset, rgb=False):
    if rgb:
-      normals = np.zeros((0, 80, 80, 3), dtype=np.uint8)
+      normals = np.zeros((0, 80, 80, 3))
    else:
-      normals = np.zeros((0, 80, 80, 1), dtype=np.uint8)
+      normals = np.zeros((0, 80, 80, 1))
 
    for idx, codeBlock in enumerate(dataset):
       if idx % 2 == 0:
@@ -33,9 +33,9 @@ def getNormals(dataset, rgb=False):
 
 def getAnomalies(dataset, rgb=False):
    if rgb:
-      anomalies = np.zeros((0, 80, 80, 3), dtype=np.uint8)
+      anomalies = np.zeros((0, 80, 80, 3))
    else:
-      anomalies = np.zeros((0, 80, 80, 1), dtype=np.uint8)
+      anomalies = np.zeros((0, 80, 80, 1))
 
    for idx, codeBlock in enumerate(dataset):
       if idx % 2 == 1:

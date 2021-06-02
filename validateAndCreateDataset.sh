@@ -17,6 +17,7 @@ validateFileBlocks() {
       fi
       
       # Make sure chopped file is correct as orignal
+      # testChopping.py chops file and writes it as well
       python testChopping.py $file > /dev/null 2>&1
       if [ $? -ne 0 ]; then
          echo FAILED: $file 

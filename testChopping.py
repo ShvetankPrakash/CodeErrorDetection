@@ -3,6 +3,7 @@ import numpy as np
 from generateData import chopFile
 
 def testChopFile(filename):
+   # This call to chopFile() also saves the chopped npy code blocks to a file
    codeBlocks = chopFile(filename)
 
    if len(codeBlocks) > 0: 

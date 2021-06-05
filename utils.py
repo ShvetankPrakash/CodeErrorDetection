@@ -3,6 +3,7 @@
 import os
 import glob
 import sys
+import ast
 import numpy as np
 
 def printCode(codeBlock):
@@ -18,5 +19,14 @@ def diffCodeBlock(b1, b2):
          continue
       print(i)
       print(row)
+
+
+def codeBlockToString(codeBlock):
+   codeBlock = codeBlock.flatten()
+   codeString = ""
+   for letter in codeBlock:
+      codeString += letter
+
+   return codeString 
 
 

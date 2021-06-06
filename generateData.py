@@ -29,21 +29,40 @@ def chopFile(filename):
 
       # End of code block reached, create new block
       if row == SIZE:
-         codeBlocks.append(matrix) 
-         matrix = np.zeros((SIZE, SIZE), dtype=np.uint8)
-         row = 0
-         col = 0
+         if isValidPython(codeBlockToString(matrix)):
+            codeBlocks.append(matrix) 
+            matrix = np.zeros((SIZE, SIZE), dtype=np.uint8)
+            row = 0
+            col = 0
+         else:
+            nextBlock = np.zeros((0, SIZE), dtype=np.uint8)
+            lastRowErased = SIZE
+            while not isValidPython(codeBlockToString(matrix)):
+               nextBlock = np.insert(nextBlock, 0, matrix[lastRowErased - 1], axis=0)
+               matrix[lastRowErased - 1] = 0
+               lastRowErased -= 1
+               if lastRowErased < 1:
+                  #print(len(codeBlocks))
+                  #raise Exception("Can not create a valid code block...")
+                  return writeBlocks(f, filename, codeBlocks)
+                  
+            codeBlocks.append(matrix) 
+            matrix = np.zeros((SIZE, SIZE), dtype=np.uint8)
+            row = nextBlock.shape[0]
+            col = 0
+            matrix[0:row] = nextBlock[0:row]
 
-   if not (matrix == 0).all():
+   if not (matrix == 0).all() and isValidPython(codeBlockToString(matrix)):
       codeBlocks.append(matrix) 
-      
-   for block in codeBlocks:
-      printCode(block) 
-      print("-------------------------------------------------------------------------")
+
+   writeBlocks(f, filename, codeBlocks)
+
+
+def writeBlocks(f, filename, codeBlocks):      
    # Write chopped blocks to .npy file
-   #writeName = filename.split("/")[-1].split(".")[0]
-   #for i, block in enumerate(codeBlocks):
-   #   np.save("./dataset/" + writeName + "_" + str(i) + ".npy", block)  
+   writeName = filename.split("/")[-1].split(".")[0]
+   for i, block in enumerate(codeBlocks):
+      np.save("./dataset/" + writeName + "_" + str(i) + ".npy", block)  
 
    f.close()
    return codeBlocks

@@ -25,14 +25,17 @@ def codeBlockToString(codeBlock):
    codeBlock = codeBlock.flatten()
    codeString = ""
    for letter in codeBlock:
-      codeString += letter
+      if letter == 0:
+         continue
+      else:
+         codeString += chr(letter)
 
    return codeString 
 
 
-def is_valid_python(code):
+def isValidPython(codeString):
    try:
-       ast.parse(code)
+       ast.parse(codeString)
    except SyntaxError:
        return False
    return True

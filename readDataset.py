@@ -2,6 +2,7 @@
 
 import numpy as np
 import glob, os, sys
+from utils import *
 
 def readDataset(directory, rgb=False):
    # Seed random num generator for reproducability
@@ -33,12 +34,20 @@ def readDataset(directory, rgb=False):
       while (errorBlock[indexOne, indexTwo] == 0).all():
          indexOne = np.random.randint(79) 
          indexTwo = np.random.randint(79)
+     
+      # Set dummy error 
+      origChar = errorBlock[indexOne, indexTwo]
       randChar = np.random.randint(32, 127) 
+      errorBlock[indexOne, indexTwo] = randChar  
 
-      # Make sure random char is not same as orig char to enforce error
-      while (randChar == errorBlock[indexOne, indexTwo]).all(): 
+      # Make sure random char makes the code block contain an error 
+      while isValidPython(codeBlockToString(errorBlock)): 
+         errorBlock[indexOne, indexTwo] = origChar # reset to orig  
+         indexOne = np.random.randint(79) 
+         indexTwo = np.random.randint(79)
+         origChar = errorBlock[indexOne, indexTwo]
          randChar = np.random.randint(32, 127) 
-      errorBlock[indexOne, indexTwo] = randChar # set dummy error 
+         errorBlock[indexOne, indexTwo] = randChar # set dummy error 
       dataset = np.insert(dataset, dataset.shape[0], errorBlock, 0)
       labels = np.append(labels, 0)
   

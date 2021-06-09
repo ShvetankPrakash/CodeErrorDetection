@@ -55,7 +55,7 @@ def chopFile(filename):
    if not (matrix == 0).all() and isValidPython(codeBlockToString(matrix)):
       codeBlocks.append(matrix) 
 
-   writeBlocks(f, filename, codeBlocks)
+   return writeBlocks(f, filename, codeBlocks)
 
 
 def writeBlocks(f, filename, codeBlocks):      

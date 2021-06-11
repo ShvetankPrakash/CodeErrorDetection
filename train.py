@@ -12,10 +12,10 @@ from autoencoder import Autoencoder
 
 
 # Constants for training
-DATASET_DIR = "./dataset_orig"
+DATASET_DIR = "./dataset"
 BATCH_SIZE = 64
 SHUFFLE_BUFFER_SIZE = 100
-EPOCHS = 15
+EPOCHS = 20
 
 def getNormals(dataset, rgb=False):
    if rgb:
@@ -144,8 +144,8 @@ def getAutoencoder():
 def train():
    # Obtain TF datasets
    rgb = False
-   autoencoder = True
-   normalize = True
+   autoencoder = False
+   normalize = False
    trainDataset, testDataset = getDataset(rgb, autoencoder, normalize) 
 
    # Shuffle and batch the datasets
@@ -154,12 +154,12 @@ def train():
       testDataset = testDataset.batch(BATCH_SIZE)
 
    # Obtain and train model
-   #model = getMultiClassCnn() 
+   model = getMultiClassCnn() 
    #model = getBinaryCnn() 
    #model = getResnet() 
-   model = getAutoencoder()
+   #model = getAutoencoder()
  
-   checkpoint_filepath = '../best_model_autoencoder.h5'
+   checkpoint_filepath = '../best_model.h5'
    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=checkpoint_filepath,
       save_weights_only=True,
@@ -168,9 +168,9 @@ def train():
       save_best_only=True) 
 
    # Multi-Model CNN Compilation
-   #model.compile(optimizer=tf.keras.optimizers.RMSprop(),
-   #              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-   #              metrics=['sparse_categorical_accuracy'])
+   model.compile(optimizer=tf.keras.optimizers.RMSprop(),
+                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                 metrics=['sparse_categorical_accuracy'])
 
    # Binary Model CNN Compilation
    #model.compile(optimizer=tf.keras.optimizers.RMSprop(),
@@ -182,19 +182,19 @@ def train():
    #model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
    #              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
    #              metrics=['accuracy'])
-   #model.fit(
-   #   trainDataset, 
-   #   epochs=EPOCHS,
-   #   validation_data=testDataset,
-   #   callbacks=[model_checkpoint_callback])
+   model.fit(
+      trainDataset, 
+      epochs=EPOCHS,
+      validation_data=testDataset,
+      callbacks=[model_checkpoint_callback])
 
    # Autoencoder Compilation
-   model.compile(optimizer='adam', loss=losses.MeanSquaredError())
-   model.fit(trainDataset, trainDataset,
-                epochs=EPOCHS,
-                shuffle=True,
-                validation_data=(testDataset, testDataset),
-                callbacks=[model_checkpoint_callback])
+   #model.compile(optimizer='adam', loss=losses.MeanSquaredError())
+   #model.fit(trainDataset, trainDataset,
+   #             epochs=EPOCHS,
+   #             shuffle=True,
+   #             validation_data=(testDataset, testDataset),
+   #             callbacks=[model_checkpoint_callback])
 
 
    # Evaluate model 

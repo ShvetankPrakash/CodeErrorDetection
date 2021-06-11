@@ -46,3 +46,7 @@ python generateData <filename.py>
 ```
 python train.py
 ```
+
+#### Project Report
+
+This [powerpoint](https://docs.google.com/presentation/d/1rWF3lKriZLy44vihsGvk9WKLdKkVXzxNCWBqJ6R8i1E/edit?usp=sharing) contains a summary of different ideas investigated and explored along with work and findings from the term research project.

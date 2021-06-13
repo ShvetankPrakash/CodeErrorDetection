@@ -159,7 +159,7 @@ def train():
    #model = getResnet() 
    #model = getAutoencoder()
  
-   checkpoint_filepath = '../best_model_readDataset3.h5'
+   checkpoint_filepath = '../best_model_w_threshold.h5'
    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=checkpoint_filepath,
       save_weights_only=True,
